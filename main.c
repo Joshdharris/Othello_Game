@@ -31,7 +31,7 @@ player black, white; //Create a struct for black and one for white.
 // Function declarations
 int printBoard();
 void initialSetup();
-void updatePlayerScore();
+void updatePlayerScore(int, int);
 int checkMoves();
 int play();
 void playerMove();
@@ -95,20 +95,16 @@ void initialSetup(){
     Board[4][4] = 'B';
 
 }
-void updatePlayerScore(){
-    /* Scans through the array and updates each player's score based on number of matches in the array */
-    black.score = 0;
-    white.score = 0;
+void updatePlayerScore(int dirRow, int dirCol){
 
-    for (int i = 0; i< BDSIZE; i++){
-        for (int j = 0; j < BDSIZE; j++){
-            if (Board[i][j] == 'B'){
-                black.score++;
-            }
-            if (Board[i][j] == 'W'){
-                white.score++;
-            }
-        }
+    if (Board[dirRow][dirCol] == 'B'){
+        black.score++;
+        white.score--;
+
+    }
+    else if (Board[dirRow][dirCol] == 'W'){
+        white.score++;
+        black.score--;
     }
 }
 int printBoard(){
@@ -183,7 +179,7 @@ int checkMoves() {
 int play(){
     int anyValid;
 
-    updatePlayerScore();
+   // updatePlayerScore();
     anyValid = checkMoves(); // Check for possible moves
     if (anyValid == 0){
         printf("Sorry %s, you have no available moves\n", (currCol == 'B' ? black.name : white.name));
@@ -235,6 +231,7 @@ void playerMove(){
     move(row, colNum, 0); //Take the move
 }
 int move(int row, int col, int check){
+    int flag = 1; // used later to ensure player only scores once for an empty square
 
     for (int rowPos = -1; rowPos <= 1; rowPos++) {
         for (int colPos = -1; colPos <= 1; colPos++) {
@@ -264,10 +261,21 @@ int move(int row, int col, int check){
                             }
 
                             else {  // If we are taking a move: go back through the squares and change them to our colour.
+
+                                if (flag > 0) {
+                                    (currCol == 'B' ? black.score++ : white.score++);  // Add 1 to player's score for the empty square
+                                    flag--; // Flag ensures blank square is not counted multiple times.
+                                }
+
                                 while (!(dirRow == row && dirCol == col)) {
                                     dirRow = dirRow - rowPos;
                                     dirCol = dirCol - colPos;
                                     Board[dirRow][dirCol] = currCol;
+
+                                    // Finally we update the score to reflect changing those pieces which have swapped colours.
+                                    if (!(dirRow == row && dirCol == col)) {
+                                        updatePlayerScore(dirRow, dirCol);
+                                    }
                                 }
                             }
                         }
