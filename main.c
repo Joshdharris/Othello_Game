@@ -1,17 +1,15 @@
 /*
  * Coded by Joshua Harris - 20709465 - joshua.harris@ucdconnect.ie
  *
- * Alteration to consider:
- * Change user input coordinates to allow for changing board size. This will mean changing the print function and stuff
- *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 
-#define BDSIZE 8  // This is the size of the board. At this stage, the game only works with an 8 by 8 board.
+#define BDSIZE 8 // This is the size of the board. Works for any board up to 26 x 26.
 
 char Board[BDSIZE][BDSIZE]; // Contains current board setup
 int validMoves[BDSIZE][BDSIZE]; // Contains moves that are valid
@@ -78,7 +76,7 @@ void initialSetup(){
     }
     white.name[strcspn(white.name, "\n")] = 0;
 
-    // Set scores to 2 (This avoids scanning the array to get the score)
+    // Set scores to 2
     black.score = 2;
     white.score = 2;
 
@@ -89,10 +87,12 @@ void initialSetup(){
         }
     }
 
-    Board[3][3] = 'B';
-    Board[3][4] = 'W';
-    Board[4][3] = 'W';
-    Board[4][4] = 'B';
+    // This prepares the board. The pieces are placed in the middle. (Note this game will support a board that is an
+    // odd number of squares. In this case, the starting pieces will still be near the center.
+    Board[BDSIZE/2 - 1][BDSIZE/2 - 1] = 'B';
+    Board[BDSIZE/2 - 1][BDSIZE/2] = 'W';
+    Board[BDSIZE/2][BDSIZE/2 - 1] = 'W';
+    Board[BDSIZE/2][BDSIZE/2] = 'B';
 
 }
 void updatePlayerScore(int dirRow, int dirCol){
@@ -108,19 +108,33 @@ void updatePlayerScore(int dirRow, int dirCol){
     }
 }
 int printBoard(){
-  /* This function will print out the board, using the values saved within the Board array */
+  /* After a bit of faffing about with this, I managed to rewrite this function so that it works for any size board */
 
-  printf("  %s: %d v %d :%s", black.name, black.score, white.score, white.name);
+    printf("  %s: %d v %d :%s\n", black.name, black.score, white.score, white.name);
 
+    // Print top line of board
     for (int i = 0; i< BDSIZE; i++){
-        printf("\n   --- --- --- --- --- --- --- ---\n");
-        printf("%d |", i+1);
-        for (int j = 0; j < BDSIZE; j++){
-            printf(" %c |", Board[i][j]);
-        }
+        printf(" ---");
     }
-    printf("\n   --- --- --- --- --- --- --- ---\n");
-    printf("    A   B   C   D   E   F   G   H\n\n");
+    printf("\n");
+
+    for (int j = 0; j< BDSIZE; j++){
+        for (int k = 0; k < BDSIZE; k++){
+            printf("| %c ", Board[j][k]); // prints each line with the values from Board array
+        }
+        printf("| %d", j+1);  // Prints row number
+        printf("\n");
+        for (int i = 0; i< BDSIZE; i++){
+            printf(" ---");  //prints line under each row
+        }
+        printf("\n");
+    }
+
+    // prints letters for the columns
+    for (int i = 0; i<BDSIZE; i++){
+        printf("  %c ", 'A'+ i);
+    }
+    printf("\n");
 
 
     //  LISTS VALID MOVES - looks through validMoves array to check which squares are valid.
@@ -141,9 +155,8 @@ void switchPlayer() {
     if (currCol == 'B') {
         currCol = 'W';
         oppCol = 'B';
-        // CHANGE CURRENT PLAYER TO PLAYER 2
-    }
-    else{
+    }    // CHANGE CURRENT PLAYER TO PLAYER 2
+    else {
         currCol = 'B';
         oppCol = 'W';
     }    // CHANGE CURRENT PLAYER TO PLAYER 1
@@ -154,8 +167,8 @@ int checkMoves() {
     /* This function checks whether a move is valid. */
 
     // First reset the valid moves array so there are no valid moves.
-    for (int i = 0; i< 8; i++){
-        for (int j = 0; j<8; j++){
+    for (int i = 0; i< BDSIZE; i++){
+        for (int j = 0; j<BDSIZE; j++){
             validMoves[i][j] = 0;
         }
     }
@@ -192,7 +205,7 @@ int play(){
     }
     printBoard();// Reprint board
     playerMove();// Ask the current player for their turn
-    switchPlayer();// Switch Players?? (Or in main?)
+    switchPlayer();// Switch players
 
     return 1;
 }
@@ -200,29 +213,17 @@ void playerMove(){
     char column;
     int row, colNum, valid = 0;
 
-    //Ask the player for their move.
-    printf("%s, select your move:  ", (currCol == 'B' ? black.name : white.name)); //Ternary option
+    //Ask the player for their move, using ternary option.
+    printf("%s, select your move:  ", (currCol == 'B' ? black.name : white.name));
 
     while (valid == 0){
-        scanf(" %c%d", &column, &row);
-        clearBuffer();
-        if (column >= 'a' && column <= 'z'){
-            column = column-32;  //Converts lowercase character to upper-case
-        }
-        while (column < 'A' || column > 'H' || row < 1 || row > 8) {
-            puts("Sorry, that's not a valid move. Try again");
-            scanf(" %c%d", &column, &row);
-            clearBuffer();
-            if (column >= 'a' && column <= 'z'){
-                column = column-32;  //Converts lowercase character to upper-case
-            }
-        }
-        //Remove 1 from row number as the board starts from 1 but the array starts from 0.
-        row--;
-        //Convert column to a number
-        colNum = column - 'A';
+        scanf(" %c%d", &column, &row);  // Take in user input
+        clearBuffer();                  //Remove excess characters
+        column = toupper(column);       //Converts lowercase character to upper-case
+        row--;                          //Remove 1 from row number as the board starts from 1 but the array starts from 0.
+        colNum = column - 'A';          //Convert column to a number
         if (validMoves[row][colNum] == 1){
-            valid = 1;
+            valid = 1;                  //Breaks the loop if the move is valid
         }
         else
             puts("Sorry, that's not a valid move. Try again");
