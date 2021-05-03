@@ -1,0 +1,45 @@
+Joshua Harris - 20709465 - joshua.harris@ucdconnect.ie
+Report(?) on Othello Game:
+
+I don't fully understand what this report is supposed to say. So I will just talk about various things I did in my program and hopefully that covers it.
+
+I went through a myriad of options for how to structure this. And I'll detail each in turn:
+
+The Board: This was easy, I knew the best way was to have a 2d array. Originally I was going to use an int array and have checking and pieces on the same board. Eventually I decided it would be easier to implement it as a char array, as then I could print the characters directly.
+
+Players: A struct was the obvious option. I created a typedef struct which had name and score, then created 1 for each player - named black and white. 
+
+The discs: These were just characters 'B' for black, 'W' for white. 
+
+Printing the board: Fairly simple, just took a bit of playing with to make it look decent. Prints the players and their scores. Then prints out lines and dashes to create a virtual grid. It also reads through the Board array and prints out the corresponding character in that part of the array. After tinkering with the program, I edited this so it would work for any size up to 26x26 (could go bigger but the alphabet only has 26 letters!). The size of the Board Size is saved in the GlobalValues header file under BDSIZE (and is set to 8 by default).
+
+Saving valid moves: One of the harder components. I tried a few options on this and eventually decided to go for just an identical 2d array, which matched the board. For each turn, it would scan the board for valid moves. If it found one, the value in the corresponding position in the validMoves array was changed to 1. This is not efficient and, with more time and less exams, I would probably try to change this, because clearing all 64 elements (for an 8x8 board) every time you check for valid moves, and then going back to change the relevant positions to 1 is not super efficient. However it works well and was easy to understand so I went with it. 
+
+Checking for valid moves: The hardest part to program and to wrap my head around. This took a lot of Googling to start to understand how I could approach this. I concluded there were 2 options: scan for current colour and then check around that square for valid moves (more efficient early game), or scan the empty squares for moves (more efficient late game). I opted for option 2. I would check each blank square and scan around it to look for the opposition player. The tricky part came next - it had to keep moving in that particular direction checking for a colour. If it hit an empty square or went out of the board, then the original blank square was not a valid move. 
+I originally tried to program each individual direction. This involved simply adding or subtracting to/from a row or column to move in that direction. But I needed to save the original position. In the end I came upon a novel way of doing it, which was to scan all 8 directions at once. How it worked it to set a counter running from -1 to 1 for columns and rows. You could then add that number to the current position and the -1 would move towards top and left of the board, whilst +1 moved towards the bottom and right. The problem was the error checking, and the end result of the function looks quite confusing at first glance. 
+Basically, starting at an empty square I try going from -1 to 1 for both rows and columns. I check if it's in the range of the board and ensure I'm not checking the original square (which would be +0 to column and +0 to row). If a square in that direction is blank or belongs to the current player, I ignore that direction. If the next square in any direction belongs to the opponent, it shows the current square might be a valid move. In this case, I needed to create new variables to store the new values of the rows and columns as I moved through the array. (Obviously I didn't want to lose the co-ordinates of the original square). Whichever direction we were moving in, I would keep adding the same amount to the new variables, to check that direction. (e.g. if checking in a north west direction, I would add -1 to both the column and the row each time. )
+When the new co-ordinates no longer point to an opposition colour, if it's pointing to the current player's colour, then you have a blank square, then opposition colour, then current player colour. This means the blank square is a valid move for that colour. The empty square's position is changed to 1 in the validMoves array to reflect that this is a valid move. 
+
+Making a move:  When the player is asked for a move, the chosen move is compared against the validMoves array to see if that move is allowed. If it's an invalid move, the player is asked for a different move. If valid, run the same function used for checking, except we only check from that individual square. We still scan every direction around that sqaure as it's possible to score in multiple directions at the same time. This time though when a valid move is found in one direction, we backtrack through all the squares we've passed through and change them to the current player's colour.
+
+Updating the score: Originally I just ran this function after each turn. It would go through the entire Board array and scan each square to see who it belonged to updating the score this way. It was pretty inefficient because I would have to reset the score each turn, plus count every element again. I changed this, with a bit of difficulty to update when the player made a move. This was easy enough (when flipping a colour, add 1 to current player's score, subtract 1 from opponent), but started messing up if a square had multiple directional matches. In this case, it was double-counting the blank square. I had to set a flag (actually, an int) which changed after it had added the score for the blank square to prevent this double-counting. 
+
+Finding a winner: There were a lot of ways I could have approached this. The way I opted for was just checking if both players had any valid moves. If neither player could move (either because the board was full, or one player had taken all the pieces, or there just was no valid squares for either player to move into) the game ended. I could have added checks to see if one player's score was 0, or if there were no empty squares on the board, but actually just checking for valid moves for both players worked fine, so I saw no reason to change this. 
+When neither player could move, scores are compared and the highest number declared the winner. If they matched it was a tie. 
+
+Saving to file: Simple enough though I had to do research on how to get the time. Used a time function to get the time in seconds at the start of the game. When the game ends, this variable is passed to the saveToFile function which converts it into date and time, before saving to a file. I opted to do it this way so the file is not open for the whole game wasting memory. Instead the file is only opened when it needs to be written to right at the end of the game. The name and score of the highest player is also printed to the file. 
+
+Overview of how the game works:
+initial Setup - Prepares board, score, gets player names
+play - runs as long as there is a move available.Consists of:
+	checkMoves - finds all valid moves. (Uses move function)
+	printBoard - prints current score, board and valid moves.
+	playerMove - asks for move. Runs move function, which:
+		move - changes any counters which meet the requirements then:
+		updatePlayerScores - updates the scores of each player during the move function.
+	switchPlayers - swaps the current player
+endGame - runs when there are no valid moves. Prints score to screen
+saveToFile - saves the winner, score and the date and time of game start to a file.
+
+
+I used another header file called GlobalValues which contained any of the values used across the entire program. This includes the board size, Board array, validMoves array and the structs for the players. I could have used less global values, but it seemed silly to have the same vlaue passed into almost every single function argument, when I could just use a global variable. Due to the small size of the program, I decided it was fine to use some global values. 
