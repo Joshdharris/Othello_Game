@@ -1,13 +1,14 @@
-//
-// Created by Josh on 03/05/2021.
-//
+/*
+ *  Created by Joshua Harris (20709465) joshua.harris@ucdconnect.ie on 03/05/2021.
+ *  This contains any functions that run after the game has been won.
+ */
 
 #include "PostWin.h"
 #include "GlobalValues.h"
 
 void endGame(int seconds){
 
-    printBoard(); //Print the board again
+    printBoard(); //Print the board again to show final winning board layout
 
     // Print final scores and save the results to a file.
     printf("\nGAME OVER\n");
@@ -25,9 +26,9 @@ void endGame(int seconds){
         saveToFile(seconds, 'T');
     }
 
-
 }
 int saveToFile(long gameStart, char player){
+    /* Saves the results and the date & time to a file. */
 
     struct tm currentTime = *localtime(&gameStart); // The time in seconds is divided into year, month, etc.
 

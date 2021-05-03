@@ -1,6 +1,6 @@
-//
-// Created by Joshua Harris (20709465) joshua.harris@ucdconnect.ie on 03/05/2021.
-//
+/*
+ * Created by Joshua Harris (20709465) joshua.harris@ucdconnect.ie on 03/05/2021.
+ */
 
 #include "Moves.h"
 #include "GlobalValues.h"
@@ -19,11 +19,10 @@ int checkMoves() {
 
     int totalMoves = 0; //Keeps track of total number of available moves.
 
-    // If a square on the board is empty, we run the move check to verify whether it is a valid move or not. Move check
-    // will return 0 if the move is not valid, and 1 if it is. We add this to our total moves.
+    // If square is empty, verify whether it is a valid move. Move check returns 0 if invalid, 1 if valid. Add to total moves.
     for (int i = 0; i < BDSIZE; i++) {
         for (int j = 0; j < BDSIZE; j++) {
-            if (Board[i][j] == ' ') {  // If
+            if (Board[i][j] == ' ') {
                 totalMoves += move(i, j, 1);
             }
         }
@@ -32,19 +31,20 @@ int checkMoves() {
 
 }
 int move(int row, int col, int check){
+    /* This function both checks for available moves, and carries out a particular move if required */
+
     int flag = 1; // used later to ensure player only scores once for an empty square
 
     for (int rowPos = -1; rowPos <= 1; rowPos++) {
         for (int colPos = -1; colPos <= 1; colPos++) {
 
-            // We make sure that each square being checked is on the board. The final bracket ensures we aren't checking the
-            // same square (which will be at rowPos = 0, colPos = 0)
+            // Ensure each square being checked is on the board. Final bracket ensures we aren't checking the same square.
             if ((rowPos + row >= 0) && (rowPos + row < BDSIZE) && (colPos + col >= 0) && (colPos + col < BDSIZE) && !(rowPos == 0 && colPos == 0)) {
 
-                // As long as it's a valid square we check if it belongs to the opponent. If it does, there is a potential valid move.
+                // Check if square belongs to the opponent. If it does, there is a potential valid move.
                 if (Board[rowPos + row][colPos + col] == oppCol) {
 
-                    // The square belongs to the opponent. We need to keep checking in that direction. Save the position of the checked square.
+                    // The square belongs to the opponent. Keep checking in that direction. Save position of the checked square.
                     int dirRow = rowPos + row;
                     int dirCol = colPos + col;
 
@@ -68,7 +68,7 @@ int move(int row, int col, int check){
                                     flag--; // Flag ensures blank square is not counted multiple times.
                                 }
 
-                                while (!(dirRow == row && dirCol == col)) {
+                                while (!(dirRow == row && dirCol == col)) {  // Backtracks through the squares and changes to current player's colour.
                                     dirRow = dirRow - rowPos;
                                     dirCol = dirCol - colPos;
                                     Board[dirRow][dirCol] = currCol;
@@ -88,6 +88,7 @@ int move(int row, int col, int check){
     return 0;
 }
 void updatePlayerScore(int dirRow, int dirCol){
+    /* Updates the player's score */
 
     if (Board[dirRow][dirCol] == 'B'){
         black.score++;

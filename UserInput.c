@@ -1,6 +1,6 @@
 //
-// Created by Josh on 03/05/2021.
-//Contains any functions that involve user input.
+// Created by Joshua Harris (20709465) joshua.harris@ucdconnect.ie on 03/05/2021.
+// Contains any functions that involve user input.
 
 #include "Moves.h"
 #include "UserInput.h"
@@ -36,7 +36,7 @@ void initialSetup(){
     }
 
     // This prepares the board. The pieces are placed in the middle. (Note this game will support a board that is an
-    // odd number of squares. In this case, the starting pieces will still be near the center.
+    // odd number of squares. In this case, the starting pieces will still be near the center.)
     Board[BDSIZE/2 - 1][BDSIZE/2 - 1] = 'B';
     Board[BDSIZE/2 - 1][BDSIZE/2] = 'W';
     Board[BDSIZE/2][BDSIZE/2 - 1] = 'W';
@@ -44,7 +44,7 @@ void initialSetup(){
 
 }
 void playerMove(){
-    char column;
+    unsigned char column;
     int row, colNum, valid = 0;
 
     //Ask the player for their move, using ternary option.

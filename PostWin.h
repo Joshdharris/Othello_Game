@@ -1,6 +1,6 @@
-//
-// Created by Josh on 03/05/2021.
-//
+/*
+ * Created by Joshua Harris (20709465) joshua.harris@ucdconnect.ie on 03/05/2021.
+ */
 
 #ifndef OTHELLO_GAME_POSTWIN_H
 #define OTHELLO_GAME_POSTWIN_H
